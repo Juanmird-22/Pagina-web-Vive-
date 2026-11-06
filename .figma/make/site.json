@@ -1,0 +1,10 @@
+{
+  "description": "Vive+ promotes healthy habits for young adults aged 18 to 28, offering an engaging platform with intuitive design and user-friendly features.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
