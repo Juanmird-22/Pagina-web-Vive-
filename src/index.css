@@ -375,3 +375,16 @@ h3 { font: 700 16px/22px 'Lato', sans-serif; }
   .avatar--large { width: 95px; height: 95px; }
   .profile-identity > div .button { left: 42px; }
 }
+
+/* Publicaciones reales y perfiles */
+.mosaic-card .noimg { width: 100%; height: 100%; display: grid; place-items: center; padding: 22px; text-align: center; background: linear-gradient(135deg, var(--blue), var(--green)); font: 700 18px 'Lato', sans-serif; }
+.drawer-img { width: 100%; max-height: 240px; object-fit: cover; border-radius: 12px; margin: 12px 0; }
+.person { display: grid; gap: 10px; justify-items: start; }
+.person p { margin: 0; }
+.person .feed-avatar { width: 64px; height: 64px; font-size: 22px; }
+.person-posts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+.person-posts img, .person-note { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; }
+.person-note { display: grid; place-items: center; padding: 8px; font-size: 12px; text-align: center; background: var(--bg); border: 1px solid var(--border); overflow: hidden; }
+
+.notification-icon--like { background: #FDE8E6; color: #E57A6F; }
+.notification-icon--amigos { background: var(--yellow-tint); color: var(--yellow); }
