@@ -388,3 +388,312 @@ h3 { font: 700 16px/22px 'Lato', sans-serif; }
 
 .notification-icon--like { background: #FDE8E6; color: #E57A6F; }
 .notification-icon--amigos { background: var(--yellow-tint); color: var(--yellow); }
+
+
+/* ==============================================================================
+   NUEVAS MEJORAS VIVE+
+   ============================================================================== */
+
+/* --- 1. Botón de peligro / confirmación --- */
+.button--danger { background: #D94848; color: #FFFFFF; }
+.button--danger:hover:not(:disabled) { background: #BF3636; }
+
+/* --- 2. Modal de confirmación al eliminar --- */
+.confirm-modal { max-width: 440px; text-align: center; padding: 32px 28px; }
+.confirm-icon-wrap { width: 64px; height: 64px; border-radius: 50%; background: #FDE8E6; color: #D94848; display: grid; place-items: center; margin: 0 auto 16px; }
+.confirm-title { margin-bottom: 8px; font: 700 20px 'Lato', sans-serif; color: var(--navy); padding: 0 !important; }
+.confirm-message { color: var(--text); font-size: 14px; line-height: 22px; margin-bottom: 24px; }
+.confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.confirm-actions .button { width: 100%; min-height: 44px; }
+
+/* --- 3. Botón Buscar Amigos (Espaciado y alineación) --- */
+.friends-card-action { padding: 12px 18px 8px; display: flex; width: 100%; }
+.friends-card-action .button { width: 100%; min-height: 38px; }
+.friends-empty-msg { padding: 12px 18px; color: var(--text); font-size: 13px; margin: 0; }
+
+/* --- 4. Accesibilidad (Botón flotante y menú) --- */
+.a11y-widget-container { position: fixed; bottom: 20px; left: 20px; z-index: 55; }
+.a11y-floating-btn {
+  height: 44px;
+  border-radius: 99px;
+  background: var(--navy);
+  color: var(--white);
+  border: 1.5px solid rgba(255,255,255,.2);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 18px rgba(11,37,69,.25);
+  font: 700 13px 'Lato', sans-serif;
+  cursor: pointer;
+  transition: transform .15s, background .15s, box-shadow .15s;
+}
+.a11y-floating-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(11,37,69,.32); background: #133966; }
+.a11y-floating-btn--active { background: var(--blue); }
+.a11y-badge { color: var(--green); font-size: 10px; margin-left: 2px; }
+.a11y-menu {
+  position: absolute;
+  bottom: 54px;
+  left: 0;
+  width: 320px;
+  background: var(--white);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 40px rgba(11,37,69,.22);
+  padding: 18px;
+  animation: modal-in .18s ease;
+  z-index: 60;
+}
+.a11y-menu-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px; }
+.a11y-title-wrap { display: flex; align-items: center; gap: 9px; }
+.a11y-title-icon { font-size: 20px; }
+.a11y-menu-header h3 { margin: 0; font: 700 15px 'Lato', sans-serif; color: var(--navy); }
+.a11y-menu-header small { color: var(--text); font-size: 11px; }
+.a11y-close-btn { border: 0; background: none; font-size: 20px; line-height: 1; color: var(--text); padding: 4px; border-radius: 50%; }
+.a11y-close-btn:hover { color: var(--navy); }
+.a11y-options-list { display: flex; flex-direction: column; gap: 14px; }
+.a11y-option-item { background: var(--bg); border-radius: 12px; padding: 12px; border: 1px solid var(--border); }
+.a11y-option-item--toggle { display: flex; align-items: center; justify-content: space-between; }
+.a11y-option-header { display: flex; align-items: center; gap: 10px; }
+.a11y-option-icon { font-size: 18px; flex: 0 0 auto; }
+.a11y-option-text strong { display: block; font: 600 13px 'Lato', sans-serif; color: var(--navy); }
+.a11y-option-text small { display: block; color: var(--text); font-size: 11px; margin-top: 1px; }
+.a11y-size-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.a11y-size-btn { border: 1.5px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--navy); font-weight: 700; transition: border-color .15s, background .15s; }
+.a11y-size-btn small { font-size: 10px; font-weight: 600; color: var(--text); }
+.a11y-size-btn:hover { border-color: var(--blue); }
+.a11y-size-btn.active { border-color: var(--navy); background: var(--navy); color: var(--white); }
+.a11y-size-btn.active small { color: rgba(255,255,255,.8); }
+.a11y-menu-footer { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); text-align: center; }
+.a11y-reset-btn { border: 0; background: none; color: var(--blue); font: 700 12px 'Lato', sans-serif; cursor: pointer; }
+.a11y-reset-btn:hover { text-decoration: underline; }
+
+/* Accesibilidad: Escala de texto */
+html.font-scale-lg { font-size: 115%; }
+html.font-scale-xl { font-size: 130%; }
+
+/* Accesibilidad: Alto contraste */
+html.high-contrast {
+  --navy: #000000;
+  --blue: #004EA8;
+  --green: #007A50;
+  --yellow: #8A6000;
+  --bg: #FFFFFF;
+  --white: #FFFFFF;
+  --border: #000000;
+  --text: #000000;
+  --blue-tint: #F0F6FC;
+  --green-tint: #EDF9F4;
+  --yellow-tint: #FFF8E6;
+}
+html.high-contrast body { background: #FFFFFF; color: #000000; }
+html.high-contrast .card,
+html.high-contrast .feed-card,
+html.high-contrast .friends-card,
+html.high-contrast .modal,
+html.high-contrast .a11y-menu,
+html.high-contrast .notification {
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+}
+html.high-contrast .button--secondary {
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+html.high-contrast input,
+html.high-contrast select,
+html.high-contrast textarea {
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  background: #FFFFFF !important;
+}
+
+/* Accesibilidad: Reducción de animaciones */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* --- 5. Solicitudes de amistad (Tarjetas y estados) --- */
+.friend-requests-card { margin-bottom: 24px; padding: 20px; background: var(--white); border: 1px solid var(--border); border-radius: 16px; }
+.requests-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.requests-heading h3 { margin: 0; color: var(--navy); }
+.badge-count { background: var(--yellow); color: var(--navy); border-radius: 99px; padding: 2px 9px; font: 700 11px 'Lato', sans-serif; }
+.request-list { display: flex; flex-direction: column; gap: 10px; }
+.request-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); }
+.request-user-info { display: flex; align-items: center; gap: 10px; }
+.request-user-info strong { display: block; font: 600 13px 'Lato', sans-serif; }
+.request-actions { display: flex; gap: 8px; }
+.request-actions .button { min-height: 32px; padding: 0 12px; font-size: 12px; }
+.request-btn-accept { background: var(--green); color: var(--navy); }
+.request-btn-reject { background: var(--white); color: #D94848; border: 1px solid #D94848; }
+
+/* --- 6. Seguimiento Diario en «Tu Progreso» --- */
+.daily-progress-container { display: flex; flex-direction: column; gap: 24px; }
+.daily-progress-main { padding: 28px !important; }
+.progress-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+.section-subheading { color: var(--text); font-size: 14px; margin: 4px 0 0; }
+.streak-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 99px; background: var(--green-tint); border: 1px solid rgba(29,219,175,.4); color: var(--navy); font: 700 13px 'Lato', sans-serif; white-space: nowrap; }
+.streak-flame { font-size: 16px; }
+
+/* Métricas comparativas */
+.metrics-summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.metric-box { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; }
+.metric-label { font: 600 12px 'Lato', sans-serif; color: var(--text); text-transform: uppercase; letter-spacing: .04em; }
+.metric-val { font: 700 24px/30px 'Merriweather', Georgia, serif; color: var(--navy); margin: 4px 0 2px; }
+.metric-hint { color: var(--text); font-size: 11px; }
+.val-down { color: var(--green); }
+.val-up { color: #D94848; }
+.metric-imc-wrap { display: flex; align-items: center; gap: 8px; }
+
+/* Formulario diario de peso y altura */
+.card-sub-form { background: var(--bg); border: 1px solid var(--border); border-radius: 18px; padding: 22px; margin-bottom: 24px; }
+.sub-title { font: 700 17px 'Lato', sans-serif; color: var(--navy); margin: 0 0 14px; }
+.progress-form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: flex-start; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font: 600 13px 'Lato', sans-serif; color: var(--navy); }
+.form-group input { width: 100%; min-height: 44px; border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 12px; background: var(--white); font-size: 14px; }
+.form-group input:focus { border-color: var(--blue); outline: 0; }
+.input-hint { font-size: 10px; color: var(--text); margin-top: 2px; }
+.form-group--calc { justify-content: flex-start; }
+.live-bmi-display { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.live-bmi-val { font: 700 22px 'Merriweather', serif; color: var(--navy); }
+.form-group--full { grid-column: 1 / -1; }
+.form-actions-row { grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 4px; }
+
+/* Badges de IMC */
+.bmi-badge, .bmi-mini-pill { display: inline-flex; align-items: center; border-radius: 99px; font: 700 11px 'Lato', sans-serif; white-space: nowrap; }
+.bmi-badge { padding: 4px 10px; }
+.bmi-mini-pill { padding: 2px 8px; font-size: 10px; }
+.bmi-badge--normal { background: var(--green-tint); color: #0C7A60; border: 1px solid rgba(29,219,175,.5); }
+.bmi-badge--underweight { background: var(--blue-tint); color: #0B638A; border: 1px solid rgba(29,160,219,.5); }
+.bmi-badge--overweight { background: var(--yellow-tint); color: #8A6500; border: 1px solid rgba(219,173,29,.5); }
+.bmi-badge--obese { background: #FDE8E6; color: #A82B2B; border: 1px solid rgba(229,122,111,.5); }
+
+/* Aclaración médica */
+.medical-disclaimer-box { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-radius: 12px; background: var(--yellow-tint); border: 1px solid rgba(219,173,29,.4); margin-top: 18px; }
+.disclaimer-icon { font-size: 18px; flex: 0 0 auto; margin-top: 1px; }
+.medical-disclaimer-box strong { display: block; font: 700 12px 'Lato', sans-serif; color: var(--navy); margin-bottom: 2px; }
+.medical-disclaimer-box p { margin: 0; font-size: 12px; line-height: 17px; color: var(--text); }
+
+/* Gráficas */
+.progress-chart-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 24px; }
+.chart-heading-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.chart-heading-row h3 { margin: 0; }
+.chart-heading-row small { color: var(--text); }
+.chart-toggle-group { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
+.chart-toggle-btn { border: 0; background: none; padding: 6px 14px; border-radius: 8px; font: 600 12px 'Lato', sans-serif; color: var(--text); cursor: pointer; transition: all .15s; }
+.chart-toggle-btn.active { background: var(--navy); color: var(--white); box-shadow: 0 2px 6px rgba(11,37,69,.12); }
+.svg-chart-container { width: 100%; overflow-x: auto; }
+.progress-svg-chart { width: 100%; height: auto; min-height: 180px; }
+.chart-point-text { font: 700 11px 'Lato', sans-serif; fill: var(--navy); }
+.chart-date-text { font: 600 10px 'Lato', sans-serif; fill: var(--text); }
+.chart-empty-state { text-align: center; padding: 36px 20px; color: var(--text); }
+.empty-chart-icon { font-size: 32px; display: block; margin-bottom: 8px; }
+
+/* Tabla de historial */
+.history-table-section { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+.history-heading-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.history-heading-row h3 { margin: 0; }
+.history-count-badge { background: var(--bg); border: 1px solid var(--border); border-radius: 99px; padding: 3px 10px; font: 600 11px 'Lato', sans-serif; color: var(--text); }
+.table-responsive-wrap { overflow-x: auto; width: 100%; }
+.progress-history-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+.progress-history-table th { padding: 10px 12px; font: 700 12px 'Lato', sans-serif; color: var(--text); border-bottom: 2px solid var(--border); text-transform: uppercase; letter-spacing: .03em; }
+.progress-history-table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--navy); }
+.cell-date strong { font-family: 'Lato', sans-serif; }
+.cell-num { font-weight: 600; }
+.cell-bmi strong { color: var(--blue); }
+.cell-notes { color: var(--text); font-size: 12px; max-width: 180px; }
+.cell-actions { text-align: right; }
+.btn-delete-record { border: 0; background: none; color: #D94848; font: 700 12px 'Lato', sans-serif; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
+.btn-delete-record:hover { background: #FDE8E6; }
+.no-history-text { color: var(--text); font-size: 13px; margin: 0; padding: 12px 0; }
+
+/* --- 7. Nuevos Retos (Catálogo y Explorador) --- */
+.challenges-hub-container { display: flex; flex-direction: column; gap: 28px; }
+.daily-featured-challenge { background: linear-gradient(135deg, var(--white), var(--green-tint)); border: 1.5px solid rgba(29,219,175,.4); border-radius: 20px; padding: 28px; }
+.daily-featured-badge { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; font: 700 13px 'Lato', sans-serif; color: #0C7A60; }
+.goal-tag { background: var(--white); border: 1px solid rgba(29,219,175,.5); border-radius: 99px; padding: 4px 12px; font-size: 12px; }
+.daily-featured-content { display: flex; gap: 20px; align-items: flex-start; }
+.daily-featured-icon { font-size: 48px; line-height: 1; flex: 0 0 auto; background: var(--white); width: 72px; height: 72px; border-radius: 20px; display: grid; place-items: center; box-shadow: 0 4px 14px rgba(11,37,69,.08); }
+.daily-featured-info { flex: 1; }
+.daily-featured-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.tag-pill { display: inline-flex; align-items: center; border-radius: 99px; padding: 3px 10px; font: 700 11px 'Lato', sans-serif; }
+.tag-pill--category { background: var(--blue-tint); color: var(--blue); border: 1px solid rgba(29,160,219,.3); }
+.tag-pill--duration { background: var(--yellow-tint); color: var(--yellow); border: 1px solid rgba(219,173,29,.3); }
+.tag-pill--difficulty { background: var(--bg); color: var(--navy); border: 1px solid var(--border); }
+.daily-featured-info h3 { margin: 0 0 6px; font: 700 22px 'Lato', sans-serif; color: var(--navy); }
+.daily-featured-desc { color: var(--text); font-size: 14px; line-height: 20px; margin: 0 0 10px; }
+.daily-featured-obj { font-size: 13px; color: var(--navy); background: rgba(255,255,255,.6); padding: 8px 12px; border-radius: 8px; }
+.daily-featured-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(29,219,175,.3); }
+.completion-instruction { color: var(--text); font-size: 13px; font-weight: 600; }
+.btn-complete-featured { min-height: 44px; padding: 0 24px; font-size: 14px; }
+
+/* Explorador de retos */
+.challenges-explorer { display: flex; flex-direction: column; gap: 18px; }
+.explorer-header h2 { margin: 0 0 4px; }
+.sub-caption { color: var(--text); margin: 0; font-size: 14px; }
+.challenges-filter-chips { margin-bottom: 4px; }
+.duration-pills-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font: 600 13px 'Lato', sans-serif; color: var(--text); margin-bottom: 8px; }
+.duration-pill-btn { border: 1px solid var(--border); border-radius: 99px; background: var(--white); padding: 4px 12px; font: 600 12px 'Lato', sans-serif; color: var(--navy); cursor: pointer; transition: all .15s; }
+.duration-pill-btn:hover { border-color: var(--blue); }
+.duration-pill-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+/* Tarjetas de retos */
+.challenges-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.challenge-card { padding: 22px; display: flex; flex-direction: column; transition: transform .18s, box-shadow .18s; position: relative; }
+.challenge-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.challenge-card--finished { border-color: var(--green); background: linear-gradient(180deg, var(--white), var(--green-tint)); }
+.challenge-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.challenge-icon { font-size: 32px; line-height: 1; }
+.challenge-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.challenge-title { margin: 0 0 8px; font: 700 17px/22px 'Lato', sans-serif; color: var(--navy); }
+.challenge-desc { color: var(--text); font-size: 13px; line-height: 19px; margin: 0 0 12px; flex: 1; }
+.challenge-target-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; margin-bottom: 14px; font-size: 12px; }
+.challenge-target-box small { display: block; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+.challenge-target-box span { color: var(--text); }
+.challenge-progress-wrap { margin-bottom: 14px; }
+.challenge-progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text); margin-bottom: 5px; }
+.challenge-progress-labels strong { color: var(--navy); }
+.challenge-progress-bar { height: 7px; border-radius: 99px; background: var(--border); overflow: hidden; }
+.challenge-progress-fill { height: 100%; background: var(--green); transition: width .3s ease; }
+.challenge-card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; }
+.challenge-card-actions .button { min-height: 38px; padding: 0 10px; font-size: 12px; }
+.btn-detail { background: var(--bg); border-color: var(--border); }
+
+/* Modal de detalle de reto */
+.challenge-detail-modal { max-width: 580px; }
+.challenge-modal-header { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; }
+.modal-ch-icon { font-size: 40px; }
+.challenge-modal-header h2 { margin: 0 0 6px; font: 700 22px 'Lato', sans-serif; color: var(--navy); }
+.modal-ch-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.challenge-modal-body { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+.ch-section h4 { margin: 0 0 4px; font: 700 14px 'Lato', sans-serif; color: var(--navy); }
+.ch-section p { margin: 0; color: var(--text); font-size: 14px; line-height: 21px; }
+.ch-tip-box { background: var(--green-tint); border: 1px solid rgba(29,219,175,.4); border-radius: 12px; padding: 12px 14px; font-size: 13px; color: var(--navy); }
+.challenge-modal-footer { display: flex; justify-content: flex-end; gap: 12px; }
+
+/* Responsive adjustments for new components */
+@media (max-width: 1050px) {
+  .metrics-summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .progress-form-grid { grid-template-columns: repeat(2, 1fr); }
+  .challenges-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .metrics-summary-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .progress-form-grid { grid-template-columns: 1fr; }
+  .daily-featured-content { flex-direction: column; }
+  .daily-featured-footer { flex-direction: column; gap: 12px; align-items: stretch; text-align: center; }
+  .challenges-grid { grid-template-columns: 1fr; }
+  .confirm-actions { grid-template-columns: 1fr; }
+  .chart-heading-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .a11y-menu { width: calc(100vw - 40px); left: 0; }
+  .a11y-btn-text { display: none; }
+  .a11y-floating-btn { width: 44px; height: 44px; padding: 0; justify-content: center; }
+}
