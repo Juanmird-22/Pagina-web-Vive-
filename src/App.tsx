@@ -136,8 +136,36 @@ function Icon({ name, size = 20 }: { name: 'home' | 'users' | 'plus' | 'bell' | 
     close: <><path d="m6 6 12 12M18 6 6 18" /></>,
     camera: <><path d="M3 7h4l2-3h6l2 3h4v13H3Z" /><circle cx="12" cy="13" r="4" /></>,
     chevron: <path d="m7 10 5 5 5-5" />,
+    pencil: <><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></>,
   }
   return <svg className="icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>
+}
+
+function ViveIcon({ size = 32, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`vive-icon ${className}`}
+      aria-hidden="true"
+    >
+      <rect width="100" height="100" rx="24" fill="#0B2545" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
+      <rect x="18" y="42" width="64" height="18" rx="9" fill="#FFFFFF" />
+      <rect x="41" y="42" width="18" height="42" rx="9" fill="#FFFFFF" />
+      <rect x="41" y="42" width="18" height="18" fill="#FFFFFF" />
+      <path
+        d="M50 14 C50 14 68 26 68 39 C68 47 59 51 50 51 C41 51 32 47 32 39 C32 26 50 14 50 14 Z"
+        fill="#1DDBAF"
+      />
+      <path d="M50 20 V 48" stroke="#0B2545" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M50 27 L 58 22" stroke="#0B2545" strokeWidth="2" strokeLinecap="round" />
+      <path d="M50 35 L 42 30" stroke="#0B2545" strokeWidth="2" strokeLinecap="round" />
+      <path d="M50 42 L 58 37" stroke="#0B2545" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
 }
 
 function Button({ children, variant = 'primary', className = '', ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'yellow' | 'ghost' }) {
@@ -158,7 +186,10 @@ function Navbar({ view, user, avatar, unread, following, navigate, logout }: {
   ]
   return (
     <nav className="navbar">
-      <button className="logo" onClick={() => navigate('Inicio')}>Vive<span>+</span></button>
+      <button className="logo" onClick={() => navigate('Inicio')} aria-label="Ir al inicio">
+        <ViveIcon size={34} />
+        <span className="logo-text">Vive<b className="logo-plus">+</b></span>
+      </button>
       <div className="navlinks">
         {links.map(([label, icon]) => (
           <button key={label} className={`navlink ${view === label ? 'navlink--active' : ''}`} onClick={() => navigate(label)}>
@@ -267,18 +298,19 @@ function RegisterView({ onRegister, onLogin }: {
   }
   return (
     <main className="register">
-      <section className="register-hero">
-        <div className="bubble bubble--one" /><div className="bubble bubble--two" />
-        <div className="register-copy">
-          <div className="register-logo">Vive<span>+</span></div>
-          <h1>Pequeños hábitos,<br />grandes cambios.</h1>
-          <p>Únete a una comunidad que te acompaña a construir hábitos saludables, sin juicios.</p>
-          <ul>
-            {['Registro en pocos clics', 'Retos individuales y grupales', 'Apoyo de tu comunidad'].map(item => <li key={item}><span>✓</span>{item}</li>)}
-          </ul>
-        </div>
-      </section>
-      <section className="register-form-wrap">
+      <div className="register-container">
+        <header className="register-brand-header">
+          <div className="register-brand-lockup">
+            <ViveIcon size={54} />
+            <span className="register-brand-name">
+              Vive<b className="register-brand-plus">+</b>
+            </span>
+          </div>
+          <span className="register-brand-tagline">
+            PEQUEÑOS HÁBITOS, GRANDES CAMBIOS
+          </span>
+        </header>
+
         <form className="register-form" onSubmit={submit} noValidate>
           <h1>{isRegister ? 'Crea tu perfil' : 'Inicia sesión'}</h1>
           {isRegister && <FormControl label="Nombre de usuario" error={touched.username ? errors.username : ''}>
@@ -304,7 +336,7 @@ function RegisterView({ onRegister, onLogin }: {
           <Button type="submit" disabled={loading}>{loading ? <><span className="spinner" />Un momento...</> : isRegister ? 'Crear cuenta' : 'Entrar'}</Button>
           <p className="signin">{isRegister ? '¿Ya tienes cuenta? ' : '¿Aún no tienes cuenta? '}<button type="button" onClick={() => { setMode(isRegister ? 'login' : 'register'); setServerError(''); setTouched({}) }}>{isRegister ? 'Inicia sesión' : 'Regístrate'}</button></p>
         </form>
-      </section>
+      </div>
     </main>
   )
 }
@@ -1014,9 +1046,17 @@ function ProfileView({
     <Page toast={toast}>
       <section className="profile-hero">
         <div className="profile-identity">
-          <div>
+          <div className="profile-avatar-wrap">
             <Avatar user={user} color={avatar} large />
-            <Button variant="secondary" onClick={onAvatar}>Cambiar avatar</Button>
+            <button
+              type="button"
+              className="avatar-edit-btn"
+              onClick={onAvatar}
+              title="Cambiar avatar"
+              aria-label="Cambiar avatar"
+            >
+              <Icon name="pencil" size={16} />
+            </button>
           </div>
           <span>
             <h1>{user.name}</h1>
