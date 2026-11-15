@@ -207,73 +207,62 @@ export async function deleteWeightRecord(
 // FRIEND REQUESTS SERVICE
 // ==============================================================================
 
-const REQUESTS_KEY = 'vive_friend_requests'
-
-function getLocalRequests(): FriendRequest[] {
-  try {
-    const data = localStorage.getItem(REQUESTS_KEY)
-    return data ? JSON.parse(data) : []
-  } catch {
-    return []
-  }
-}
-
-function saveLocalRequests(requests: FriendRequest[]) {
-  try {
-    localStorage.setItem(REQUESTS_KEY, JSON.stringify(requests))
-  } catch {
-    // ignore
-  }
-}
 
 export async function fetchFriendRequests(userId: string): Promise<{
   received: FriendRequest[]
   sent: FriendRequest[]
 }> {
-  let allRequests = getLocalRequests()
+  const { data, error } = await supabase
+    .from('friend_requests')
+    .select('id, sender_id, receiver_id, status, created_at')
+    .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+    .order('created_at', { ascending: false })
 
-  try {
-    const { data, error } = await supabase
-      .from('friend_requests')
-      .select('id, sender_id, receiver_id, status, created_at')
-      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
-
-    if (!error && data && Array.isArray(data)) {
-      // Map database rows
-      const dbRequests: FriendRequest[] = data.map((r: any) => ({
-        id: String(r.id),
-        senderId: r.sender_id,
-        senderUsername: '',
-        receiverId: r.receiver_id,
-        receiverUsername: '',
-        status: r.status as FriendRequestStatus,
-        createdAt: r.created_at,
-      }))
-
-      // Merge with local requests to keep usernames
-      const map = new Map<string, FriendRequest>()
-      allRequests.forEach(req => map.set(`${req.senderId}_${req.receiverId}`, req))
-      dbRequests.forEach(req => {
-        const key = `${req.senderId}_${req.receiverId}`
-        const existing = map.get(key)
-        map.set(key, {
-          ...req,
-          senderUsername: existing?.senderUsername || req.senderUsername,
-          receiverUsername: existing?.receiverUsername || req.receiverUsername,
-        })
-      })
-      allRequests = Array.from(map.values())
-      saveLocalRequests(allRequests)
-    }
-  } catch {
-    // ignore
+  if (error) {
+    console.error('Error cargando solicitudes:', error)
+    return { received: [], sent: [] }
   }
 
-  const received = allRequests.filter(r => r.receiverId === userId && r.status === 'pending')
-  const sent = allRequests.filter(r => r.senderId === userId)
+  const rows = data ?? []
 
-  return { received, sent }
+  // Obtener usernames mediante la función RPC
+  const { data: profiles, error: profilesError } = await supabase
+    .rpc('obtener_perfiles_solicitudes')
+
+  if (profilesError) {
+    console.error('Error obteniendo usernames:', profilesError)
+    return { received: [], sent: [] }
+  }
+
+const profilesTyped = (profiles ?? []) as {
+  id: string
+  username: string
+}[]
+
+const names = new Map<string, string>(
+  profilesTyped.map(
+    (p): [string, string] => [p.id, p.username]
+  )
+)
+
+  const requests: FriendRequest[] = rows.map(r => ({
+    id: String(r.id),
+    senderId: r.sender_id,
+    senderUsername: names.get(r.sender_id) || 'Usuario',
+    receiverId: r.receiver_id,
+    receiverUsername: names.get(r.receiver_id) || 'Usuario',
+    status: r.status as FriendRequestStatus,
+    createdAt: r.created_at
+  }))
+
+  return {
+    received: requests.filter(
+      r => r.receiverId === userId && r.status === 'pending'
+    ),
+    sent: requests.filter(r => r.senderId === userId)
+  }
 }
+
 
 export async function sendFriendRequest(
   senderId: string,
@@ -281,67 +270,76 @@ export async function sendFriendRequest(
   receiverId: string,
   receiverUsername: string
 ): Promise<{ success: boolean; request?: FriendRequest; error?: string }> {
-  if (senderId === receiverId) {
+
+  if (!senderId || !receiverId || senderId === receiverId) {
     return { success: false, error: 'No puedes enviarte una solicitud a ti mismo.' }
   }
 
-  const allRequests = getLocalRequests()
-  const existing = allRequests.find(
-    r =>
-      (r.senderId === senderId && r.receiverId === receiverId && r.status === 'pending') ||
-      (r.senderId === receiverId && r.receiverId === senderId && r.status === 'pending')
-  )
+  const { data: existingFriend, error: friendError } = await supabase
+    .from('friends')
+    .select('user_id')
+    .eq('user_id', senderId)
+    .eq('friend_id', receiverId)
+    .maybeSingle()
 
-  if (existing) {
-    return { success: false, error: 'Ya existe una solicitud pendiente entre ambos.' }
+  if (friendError) {
+    return { success: false, error: 'No se pudo verificar la amistad.' }
   }
 
-  const newRequest: FriendRequest = {
-    id: `req_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-    senderId,
-    senderUsername,
-    receiverId,
-    receiverUsername,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
+  if (existingFriend) {
+    return { success: false, error: 'Ya son amigos.' }
   }
 
-  // Update local list
-  const updated = [newRequest, ...allRequests.filter(r => !(r.senderId === senderId && r.receiverId === receiverId))]
-  saveLocalRequests(updated)
+  const { data: existingRequest, error: requestError } = await supabase
+    .from('friend_requests')
+    .select('id, status')
+    .or(
+      `and(sender_id.eq.${senderId},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId})`
+    )
+    .eq('status', 'pending')
+    .maybeSingle()
 
-  // Database attempt
-  try {
-    const { data } = await supabase
-      .from('friend_requests')
-      .insert({
-        sender_id: senderId,
-        receiver_id: receiverId,
-        status: 'pending',
-      })
-      .select('id')
-      .single()
+  if (requestError) {
+    return { success: false, error: 'No se pudo verificar la solicitud.' }
+  }
 
-    if (data?.id) {
-      newRequest.id = String(data.id)
+  if (existingRequest) {
+    return {
+      success: false,
+      error: 'Ya existe una solicitud pendiente entre ambos.'
     }
-  } catch {
-    // Database table might not be present yet, fallback works
   }
 
-  // Broadcast to other sessions/tabs via Supabase Realtime
-  try {
-    const channel = supabase.channel('friend-requests-sync')
-    await channel.send({
-      type: 'broadcast',
-      event: 'request_sent',
-      payload: newRequest,
+  const { data, error } = await supabase
+    .from('friend_requests')
+    .insert({
+      sender_id: senderId,
+      receiver_id: receiverId,
+      status: 'pending'
     })
-  } catch {
-    // ignore
+    .select('id, created_at')
+    .single()
+
+  if (error || !data) {
+    console.error(error)
+    return {
+      success: false,
+      error: 'No se pudo enviar la solicitud. Intenta nuevamente.'
+    }
   }
 
-  return { success: true, request: newRequest }
+  return {
+    success: true,
+    request: {
+      id: String(data.id),
+      senderId,
+      senderUsername,
+      receiverId,
+      receiverUsername,
+      status: 'pending',
+      createdAt: data.created_at
+    }
+  }
 }
 
 export async function acceptFriendRequest(
@@ -350,41 +348,34 @@ export async function acceptFriendRequest(
   receiverId: string,
   senderUsername: string
 ): Promise<{ success: boolean; error?: string }> {
-  // 1. Add friendship in Supabase
-  const { error: friendError } = await supabase.from('friends').insert({
-    user_id: receiverId,
-    friend_id: senderId,
-  })
 
-  if (friendError) {
-    return { success: false, error: 'No se pudo agregar a tus amigos. Intenta de nuevo.' }
+  const { data: request, error: findError } = await supabase
+    .from('friend_requests')
+    .select('id, sender_id, receiver_id, status')
+    .eq('id', requestId)
+    .eq('sender_id', senderId)
+    .eq('receiver_id', receiverId)
+    .eq('status', 'pending')
+    .single()
+
+  if (findError || !request) {
+    return {
+      success: false,
+      error: 'La solicitud ya no está disponible.'
+    }
   }
 
-  // 2. Update request status to accepted
-  const allRequests = getLocalRequests()
-  const updated = allRequests.map(r =>
-    r.id === requestId || (r.senderId === senderId && r.receiverId === receiverId)
-      ? { ...r, status: 'accepted' as FriendRequestStatus }
-      : r
+  const { error: friendshipError } = await supabase.rpc(
+    'accept_friend_request',
+    { p_request_id: requestId }
   )
-  saveLocalRequests(updated)
 
-  try {
-    await supabase.from('friend_requests').update({ status: 'accepted' }).eq('id', requestId)
-  } catch {
-    // ignore
-  }
-
-  // Broadcast update
-  try {
-    const channel = supabase.channel('friend-requests-sync')
-    await channel.send({
-      type: 'broadcast',
-      event: 'request_accepted',
-      payload: { requestId, senderId, receiverId, senderUsername },
-    })
-  } catch {
-    // ignore
+  if (friendshipError) {
+    console.error(friendshipError)
+    return {
+      success: false,
+      error: 'No se pudo aceptar la solicitud.'
+    }
   }
 
   return { success: true }
@@ -395,18 +386,18 @@ export async function rejectFriendRequest(
   senderId: string,
   receiverId: string
 ): Promise<{ success: boolean }> {
-  const allRequests = getLocalRequests()
-  const updated = allRequests.map(r =>
-    r.id === requestId || (r.senderId === senderId && r.receiverId === receiverId)
-      ? { ...r, status: 'rejected' as FriendRequestStatus }
-      : r
-  )
-  saveLocalRequests(updated)
 
-  try {
-    await supabase.from('friend_requests').update({ status: 'rejected' }).eq('id', requestId)
-  } catch {
-    // ignore
+  const { error } = await supabase
+    .from('friend_requests')
+    .update({ status: 'rejected' })
+    .eq('id', requestId)
+    .eq('sender_id', senderId)
+    .eq('receiver_id', receiverId)
+    .eq('status', 'pending')
+
+  if (error) {
+    console.error(error)
+    return { success: false }
   }
 
   return { success: true }

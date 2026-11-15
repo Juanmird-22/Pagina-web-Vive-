@@ -355,13 +355,32 @@ export function ChallengesSection({
 
   const durations: (string | ChallengeDuration)[] = ['Todos', 'Diario', '3 días', '5 días', '7 días', '14 días']
 
-  const filteredChallenges = useMemo(() => {
-    return CHALLENGES_CATALOG.filter(ch => {
-      const matchCat = selectedCategory === 'Todas' || ch.category === selectedCategory
-      const matchDur = selectedDuration === 'Todos' || ch.duration === selectedDuration
-      return matchCat && matchDur
-    })
-  }, [selectedCategory, selectedDuration])
+
+const filteredChallenges = useMemo(() => {
+  const filtered = CHALLENGES_CATALOG.filter(ch => {
+    const matchCat =
+      selectedCategory === 'Todos' ||
+      ch.category === selectedCategory
+
+    const matchDur =
+      selectedDuration === 'Todos' ||
+      ch.duration === selectedDuration
+
+    return matchCat && matchDur
+  })
+
+  // Mostrar una selección variada sin modificar el catálogo.
+  const shuffled = [...filtered]
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+
+  return shuffled.slice(0, 8)
+}, [selectedCategory, selectedDuration])
+
+
 
   // Suggested daily challenge matching user's goal
   const dailySuggested = useMemo(() => {

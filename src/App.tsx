@@ -121,8 +121,7 @@ function day(offset = 0) {
   d.setDate(d.getDate() + offset)
   return d.toLocaleDateString('en-CA')
 }
-
-function Icon({ name, size = 20 }: { name: 'home' | 'users' | 'plus' | 'bell' | 'user' | 'heart' | 'comment' | 'search' | 'flame' | 'close' | 'camera' | 'chevron'; size?: number }) {
+function Icon({ name, size = 20 }: { name: 'home' | 'users' | 'plus' | 'bell' | 'user' | 'heart' | 'comment' | 'search' | 'flame' | 'close' | 'camera' | 'chevron' | 'pencil'; size?: number }) {
   const paths: Record<string, ReactNode> = {
     home: <><path d="M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-8H9v8H4a1 1 0 0 1-1-1Z" /></>,
     users: <><circle cx="9" cy="8" r="4" /><path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2M17 4a4 4 0 0 1 0 8M22 21v-2a5 5 0 0 0-3-4.6" /></>,
@@ -172,12 +171,44 @@ function Button({ children, variant = 'primary', className = '', ...props }: Rea
   return <button className={`button button--${variant} ${className}`} {...props}>{children}</button>
 }
 
-function Avatar({ user, color, large = false }: { user: User; color: string; large?: boolean }) {
-  return <div className={`avatar ${large ? 'avatar--large' : ''}`} style={{ backgroundColor: color }}>{initials(user.name)}</div>
+function Avatar({
+  user,
+  color,
+  large = false,
+  photo
+}: {
+  user: User
+  color: string
+  large?: boolean
+  photo?: string
+}) {
+  return (
+    <div
+      className={`avatar ${large ? 'avatar--large' : ''}`}
+      style={{
+        backgroundColor: color,
+        overflow: 'hidden'
+      }}
+    >
+      {photo ? (
+        <img
+          src={photo}
+          alt={`Foto de perfil de ${user.name}`}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover'
+          }}
+        />
+      ) : (
+        initials(user.name)
+      )}
+    </div>
+  )
 }
 
-function Navbar({ view, user, avatar, unread, following, navigate, logout }: {
-  view: View; user: User; avatar: string; unread: number; following: number
+function Navbar({ view, user, avatar, avatarUrl, unread, following, navigate, logout }: {
+  view: View; user: User; avatar: string; avatarUrl: string; unread: number; following: number
   navigate: (view: View) => void; logout: () => void
 }) {
   const [open, setOpen] = useState(false)
@@ -199,9 +230,8 @@ function Navbar({ view, user, avatar, unread, following, navigate, logout }: {
         ))}
       </div>
       <div className="navright">
-        <button className="navsearch" onClick={() => navigate('Comunidad')}><Icon name="search" size={17} /> Buscar...</button>
         <button className="avatar-button" onClick={() => setOpen(value => !value)} aria-label="Abrir menú de usuario">
-          <Avatar user={user} color={avatar} />
+          <Avatar user={user} color={avatar} photo={avatarUrl} />
         </button>
         {open && (
           <div className="user-menu">
@@ -280,7 +310,13 @@ function RegisterView({ onRegister, onLogin }: {
   const [serverError, setServerError] = useState('')
   const isRegister = mode === 'register'
   const errors = {
-    username: !isRegister || /^[a-z0-9_]{3,20}$/.test(form.username) ? '' : 'Usa de 3 a 20 caracteres: minúsculas, números o _',
+    username: !isRegister
+  ? ''
+  : /\s/.test(form.username)
+    ? 'El nombre de usuario no puede contener espacios. Usa _ en su lugar. Ejemplo: maria_20'
+    : !/^[a-z0-9_]{3,20}$/.test(form.username)
+      ? 'Usa de 3 a 20 caracteres: letras minúsculas, números o guion bajo (_).'
+      : '',
     goal: !isRegister || form.goal ? '' : 'Selecciona una meta',
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) ? '' : 'Escribe un correo válido',
     password: form.password.length >= 6 ? '' : 'Usa al menos 6 caracteres',
@@ -314,7 +350,7 @@ function RegisterView({ onRegister, onLogin }: {
         <form className="register-form" onSubmit={submit} noValidate>
           <h1>{isRegister ? 'Crea tu perfil' : 'Inicia sesión'}</h1>
           {isRegister && <FormControl label="Nombre de usuario" error={touched.username ? errors.username : ''}>
-            <input value={form.username} onChange={event => change('username', event.target.value.toLowerCase().trim())} onBlur={() => setTouched(t => ({ ...t, username: true }))} placeholder="ej: maria_b" autoCapitalize="none" />
+            <input value={form.username}onChange={event => change('username', event.target.value.toLowerCase())} onBlur={() => setTouched(t => ({ ...t, username: true }))} placeholder="ej: maria_b" autoCapitalize="none" />
           </FormControl>}
           {isRegister && <FormControl label="Meta" error={touched.goal ? errors.goal : ''}>
             <select value={form.goal} onChange={event => change('goal', event.target.value)} onBlur={() => setTouched(t => ({ ...t, goal: true }))}>
@@ -436,9 +472,6 @@ function HomeView({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
               <Button onClick={onComplete} disabled={completed}>
                 {completed ? 'Completado hoy ✓' : 'Completar reto'}
-              </Button>
-              <Button variant="secondary" onClick={onOpenChallengesHub} style={{ background: 'rgba(255,255,255,0.85)', fontSize: '13px' }}>
-                Explorar todos los retos ({CHALLENGES_CATALOG.length})
               </Button>
             </div>
           </section>
@@ -1006,6 +1039,7 @@ function NotificationsView({
 function ProfileView({
   user,
   avatar,
+  avatarUrl,
   goals,
   streak,
   profile,
@@ -1023,6 +1057,7 @@ function ProfileView({
 }: {
   user: User
   avatar: string
+  avatarUrl: string
   goals: string[]
   streak: number
   profile: Info
@@ -1047,7 +1082,7 @@ function ProfileView({
       <section className="profile-hero">
         <div className="profile-identity">
           <div className="profile-avatar-wrap">
-            <Avatar user={user} color={avatar} large />
+            <Avatar user={user} color={avatar} large photo={avatarUrl || undefined} />
             <button
               type="button"
               className="avatar-edit-btn"
@@ -1132,6 +1167,7 @@ function App() {
   const [view, setView] = useState<View>('Crear perfil')
   const [user, setUser] = useState<User>({ id: '', name: '', email: '', goal: '' })
   const [avatar, setAvatar] = useState(C.blue)
+  const [avatarUrl, setAvatarUrl] = useState('')
   const [streak, setStreak] = useState(0)
   const [completed, setCompleted] = useState(false)
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS)
@@ -1164,10 +1200,61 @@ function App() {
     setToastMessage(message)
     if (toastTimer.current) window.clearTimeout(toastTimer.current)
     toastTimer.current = window.setTimeout(() => setToastMessage(''), 3000)
+
+const uploadAvatar = async (file: File) => {
+  if (!file.type.startsWith('image/')) {
+    toast('Selecciona una imagen válida.')
+    return
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    toast('La imagen no puede superar los 5 MB.')
+    return
+  }
+
+  const image = await compress(file)
+  const path = `${userId}/profile.jpg`
+
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(path, image, {
+      upsert: true,
+      contentType: 'image/jpeg'
+    })
+
+  if (uploadError) {
+    console.error(uploadError)
+    toast('No se pudo subir la fotografía.')
+    return
+  }
+
+  const { data } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(path)
+
+  const photoUrl = `${data.publicUrl}?t=${Date.now()}`
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ avatar_url: photoUrl })
+    .eq('id', userId)
+
+  if (error) {
+    console.error(error)
+    toast('No se pudo guardar la fotografía.')
+    return
+  }
+
+  setAvatarUrl(photoUrl)
+  toast('Fotografía actualizada.')
+}
+
   }
   useEffect(() => () => { if (toastTimer.current) window.clearTimeout(toastTimer.current) }, [])
   const navigate = (next: View) => { setView(next); window.scrollTo({ top: 0, behavior: 'smooth' }) }
-  const unread = notifications.filter(item => item.unread).length
+  const unread =
+  notifications.filter(item => item.unread).length +
+  receivedRequests.length
   const activePost = posts.find(post => post.id === commentsPost)
   const feed = posts.filter(post => post.userId === userId || friends.some(friend => friend.id === post.userId))
 
@@ -1193,12 +1280,19 @@ function App() {
   }
 
   const enter = async (id: string, email: string) => {
-    const { data: p } = await supabase.from('profiles').select('username, goal, age, weight, height, streak, last_completed').eq('id', id).single()
+    const { data: p } = await supabase
+  .from('profiles')
+  .select('username, goal, age, weight, height, streak, last_completed, avatar_url')
+  .eq('id', id)
+  .single()
+  
+
+    
     if (!p) return 'No pudimos cargar tu perfil. Intenta de nuevo.'
     const { data: list } = await supabase.rpc('mis_amigos')
     const done = p.last_completed === day()
     const activeStreak = done || p.last_completed === day(-1) ? p.streak : 0
-
+    
     setUserId(id)
     setUser({ id, name: p.username, email, goal: p.goal ?? '' })
     setGoals(p.goal ? [p.goal] : [])
@@ -1206,6 +1300,7 @@ function App() {
     setStreak(activeStreak)
     setCompleted(done)
     setFriends((list ?? []) as Friend[])
+    setAvatarUrl(p.avatar_url || '')
 
     // Load new modules
     await Promise.all([
@@ -1218,7 +1313,51 @@ function App() {
     navigate('Inicio')
     return ''
   }
+  const uploadAvatar = async (file: File) => {
+  if (!file.type.startsWith('image/')) {
+    toast('Selecciona una imagen válida.')
+    return
+  }
 
+  if (file.size > 5 * 1024 * 1024) {
+    toast('La imagen no puede superar los 5 MB.')
+    return
+  }
+
+  const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const path = `${userId}/profile.${extension}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(path, file, {
+      upsert: true,
+      contentType: file.type
+    })
+
+  if (uploadError) {
+    toast('No se pudo subir la fotografía.')
+    return
+  }
+
+  const { data } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(path)
+
+  const photoUrl = `${data.publicUrl}?t=${Date.now()}`
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ avatar_url: photoUrl })
+    .eq('id', userId)
+
+  if (error) {
+    toast('No se pudo guardar la fotografía en el perfil.')
+    return
+  }
+
+  setAvatarUrl(photoUrl)
+  toast('Fotografía actualizada.')
+}
   const register = async (form: { username: string; goal: string; email: string; password: string }) => {
     const { data: free, error: checkError } = await supabase.rpc('username_disponible', { nombre: form.username })
     if (checkError) return 'No pudimos conectar con el servidor. Intenta de nuevo.'
@@ -1273,6 +1412,25 @@ function App() {
         loadNotifications()
         loadFriends()
       })
+      const friendRequestsChannel = supabase
+  .channel(`friend-requests-${userId}`)
+  .on(
+    'postgres_changes',
+    {
+      event: '*',
+      schema: 'public',
+      table: 'friend_requests',
+      filter: `receiver_id=eq.${userId}`,
+    },
+    (payload) => {
+      loadRequestsData(userId)
+
+      if (payload.eventType === 'INSERT') {
+        toast('¡Tienes una nueva solicitud de amistad!')
+      }
+    }
+  )
+  .subscribe()
       .subscribe()
 
     // Realtime broadcast channel for friend requests
@@ -1303,6 +1461,7 @@ function App() {
       window.clearInterval(timer)
       supabase.removeChannel(notifsChannel)
       supabase.removeChannel(requestsChannel)
+      supabase.removeChannel(friendRequestsChannel)
     }
   }, [userId])
 
@@ -1410,7 +1569,6 @@ function App() {
       // Add mutual friend immediately
       setFriends(prev => [...prev, { id: req.senderId, username: req.senderUsername }])
       setReceivedRequests(prev => prev.filter(r => r.id !== req.id))
-      toast(`¡Ahora eres amigo de @${req.senderUsername}!`)
       loadFriends()
     } else {
       toast(res.error || 'Error al aceptar la solicitud.')
@@ -1482,7 +1640,16 @@ function App() {
   return (
     <div className="app">
       {view !== 'Crear perfil' && (
-        <Navbar view={view} user={user} avatar={avatar} unread={unread} following={friends.length} navigate={navigate} logout={logout} />
+        <Navbar
+          view={view}
+          user={user}
+          avatar={avatar}
+          avatarUrl={avatarUrl}
+          unread={unread}
+          following={friends.length}
+          navigate={navigate}
+          logout={logout}
+        />
       )}
 
       <div className="view-transition" key={view}>
@@ -1554,9 +1721,10 @@ function App() {
         )}
 
         {view === 'Perfil' && (
-          <ProfileView
-            user={user}
-            avatar={avatar}
+<ProfileView
+  user={user}
+  avatar={avatar}
+  avatarUrl={avatarUrl}
             goals={goals}
             streak={streak}
             profile={profile}
@@ -1631,32 +1799,93 @@ function App() {
         </Modal>
       )}
 
-      {modal === 'premium' && (
-        <Modal title="Vive+ Premium" onClose={closeModal}>
-          <div className="modal-copy">
-            <p>Potencia tus hábitos con herramientas creadas para acompañarte.</p>
-            <ul>
-              <li>Análisis de comidas con IA</li>
-              <li>Una experiencia sin anuncios</li>
-              <li>Retos exclusivos y planes personalizados</li>
-            </ul>
-            <Button variant="yellow" onClick={() => { closeModal(); toast('Función de demostración') }}>Probar Premium</Button>
-          </div>
-        </Modal>
-      )}
 
-      {modal === 'avatar' && (
-        <Modal title="Elige tu avatar" onClose={closeModal}>
-          <div className="avatar-options">
-            {[C.blue, C.green, C.yellow, C.navy, '#8B6BB5', '#E57A6F'].map(color => (
-              <button key={color} style={{ backgroundColor: color }} onClick={() => { setAvatar(color); closeModal() }}>
-                {initials(user.name)}
-              </button>
-            ))}
-          </div>
-        </Modal>
-      )}
+{modal === 'premium' && (
+  <Modal title="Vive+ Premium" onClose={closeModal}>
+    <div className="modal-copy">
+      <p>Potencia tus hábitos con herramientas creadas para acompañarte.</p>
+      <ul>
+        <li>Análisis de comidas con IA</li>
+        <li>Una experiencia sin anuncios</li>
+        <li>Retos exclusivos y planes personalizados</li>
+      </ul>
 
+      <p>
+        Para activar tu suscripción primero debes completar
+        el proceso de pago.
+      </p>
+
+      <div className="save-hint">
+        Estado de suscripción: No activada.
+      </div>
+
+      <Button
+        variant="yellow"
+        onClick={() => toast(
+          'El procesamiento de pagos todavía no está disponible. Tu suscripción no ha sido activada.'
+        )}
+      >
+        Continuar al pago
+      </Button>
+    </div>
+  </Modal>
+)}
+
+{modal === 'avatar' && (
+  <Modal title="Fotografía de perfil" onClose={closeModal}>
+    <div className="avatar-options">
+
+      <p>
+        Puedes mantener tus iniciales o subir una fotografía
+        para personalizar tu perfil.
+      </p>
+
+      <label className="button button--secondary">
+        Subir fotografía
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          hidden
+          onChange={async (event) => {
+            const file = event.target.files?.[0]
+            if (!file) return
+
+            await uploadAvatar(file)
+            event.target.value = ''
+          }}
+        />
+      </label>
+
+      <Button
+        variant="secondary"
+        onClick={closeModal}
+      >
+        Mantener mis iniciales
+      </Button>
+
+    <button
+      className="button button--secondary"
+      onClick={async () => {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ avatar_url: null })
+          .eq('id', userId)
+
+        if (error) {
+          toast('No se pudo eliminar la fotografía.')
+          return
+        }
+
+        setAvatarUrl('')
+        closeModal()
+      }}
+    >
+      Usar iniciales
+    </button>
+  </div>
+</Modal>
+)}
+    
       {modal === 'edit' && (
         <EditProfile
           profile={profile}
